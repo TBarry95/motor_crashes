@@ -5,3 +5,4 @@ venv/
 *.rds
 *.json
 *.config
+aws_access_keys.r
