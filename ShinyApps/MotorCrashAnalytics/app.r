@@ -59,13 +59,23 @@ DefineUserInterface <- function(){
           shinydashboard::tabItem(
             tabName="dq1",
             plotly::plotlyOutput("dq_fig1")
-            
           ),
           
           shinydashboard::tabItem(
             tabName="eda1",
             plotly::plotlyOutput("ts_fig1")
-            
+          ),
+          
+          shinydashboard::tabItem(
+            tabName="covid_hyp",
+            column(
+              width=6,
+              plotly::plotlyOutput("hist_fig1")
+            ), 
+            column(
+              width=6,
+              plotly::plotlyOutput("hist_fig2")
+            )
           )
         )
       )
@@ -87,8 +97,11 @@ DefineServer <- function(input, output){
   #########################################
   
   ts_fig1 <- readRDS("/home/rstudio/motor_crashes/Output/ts_crashes.rds")
-  
   dq_fig1 <- readRDS("/home/rstudio/motor_crashes/Output/dq_report_fig1.rds")
+  
+  hist_fig1 <- readRDS("/home/rstudio/motor_crashes/Output/hist_hyp_before.rds")
+  hist_fig2 <- readRDS("/home/rstudio/motor_crashes/Output/hist_hyp_after.rds")
+  
   
   #########################################
   # DQ tab
@@ -106,8 +119,17 @@ DefineServer <- function(input, output){
     print(ts_fig1)
   })
   
+  #########################################
+  # Hyp test tab
+  #########################################
   
+  output$hist_fig1 <- plotly::renderPlotly({
+    print(hist_fig1)
+  })
   
+  output$hist_fig2 <- plotly::renderPlotly({
+    print(hist_fig2)
+  })
   
   
 }

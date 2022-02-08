@@ -110,8 +110,27 @@ before_covid <- ts_data_sum[as.Date(ts_data_sum$DATE, format = "%m/%d/%Y") < cov
 after_covid <- ts_data_sum[as.Date(ts_data_sum$DATE, format = "%m/%d/%Y") >= covid_start, ]
 
 # samples:
-bf_sample1 <- sample(before_covid$CRASHES, size = 50)
-aft_sample1 <- sample(after_covid$CRASHES, size = 50)
+bf_sample1 <- sample(before_covid$CRASHES, size = 100)
+aft_sample1 <- sample(after_covid$CRASHES, size = 100)
+
+hist_fig1 <- plot_ly(x = bf_sample1, type = "histogram") %>%
+  layout(
+    title="Histogram: Motor crash sample before COVID 19",
+    yaxis = list(title = "FREQUENCY"),
+    xaxis = list(title = "CRASHES")
+  )
+
+hist_fig2 <- plot_ly(x = aft_sample1, type = "histogram")%>%
+  layout(
+    title="Histogram: Motor crash sample after COVID 19",
+    yaxis = list(title = "FREQUENCY"),
+    xaxis = list(title = "CRASHES")
+  )
+
+saveRDS(hist_fig1, "/home/rstudio/motor_crashes/Output/hist_hyp_before.rds")
+
+saveRDS(hist_fig2, "/home/rstudio/motor_crashes/Output/hist_hyp_after.rds")
+
 
 t.test(bf_sample1, aft_sample1) 
 
