@@ -10,6 +10,7 @@ library("plotly")
 library("shiny")
 library("stats")
 library("tseries")
+library("forecast")
 
 ############################################################
 # Define UI
@@ -136,13 +137,12 @@ DefineUserInterface <- function(){
                 tags$h2("Time Series Decomposition: Crashes per Day"),
                 shiny::plotOutput("ts_decom", width = "100%", height = "600px"),
                 shiny::textOutput("adf_test")
-              )
+              ),
               
-              # tabPanel(
-              #   "ARIMA",
-              #   shiny::plotOutput("", width = "100%", height = "600px"),
-              #   
-              # )
+              tabPanel(
+                 "ARIMA",
+                 shiny::plotOutput("ts_arima", width = "100%", height = "600px"),
+               )
           )
         )
       )
@@ -303,6 +303,24 @@ DefineServer <- function(input, output){
     } else {
       paste0("ADF test: Fail to reject Null Hypothesis (data is not stationary). P Value = ",  round(adf_res$p.value, 5))
     }
+    
+  })
+  
+  output$ts_arima <- shiny::renderPlot({
+    
+    ts_data_sum$DATE <- as.Date(ts_data_sum$DATE, format = "%m/%d/%Y")
+    ts_data_sum <- ts_data_sum[order(ts_data_sum$DATE, decreasing = F), ]
+    ts_data_sum_ts <- ts(ts_data_sum$COUNT, frequency = 365.25)
+    
+    # run auto arima:
+    forecast::auto.arima(ts_data_sum_ts, trace=TRUE)
+    
+    arima_model <- forecast::Arima(ts_data_sum_ts,
+                                   order=c(5, 1, 2),
+                                   include.drift = T)
+    
+    preds <- forecast(arima_model, h = 300, level=c(99.6))
+    plot(preds)
     
   })
   
