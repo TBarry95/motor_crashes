@@ -75,6 +75,12 @@ DefineUserInterface <- function(){
             
             tabsetPanel(
               tabPanel(
+                "Map - Today's crashes",
+                fluid = TRUE,
+                plotly::plotlyOutput("map1", width = "100%", height = "400px")
+              ),
+            
+              tabPanel(
                 "Time Series",
                 fluid = TRUE,
                 plotly::plotlyOutput("ts_fig1"),
@@ -167,7 +173,7 @@ DefineServer <- function(input, output){
   ts_fig1 <- readRDS("/home/rstudio/motor_crashes/Output/ts_crashes.rds")
   ts_fig2 <- readRDS("/home/rstudio/motor_crashes/Output/ts_crashes_ratio.rds")
   dq_fig1 <- readRDS("/home/rstudio/motor_crashes/Output/dq_report_fig1.rds")
-  
+  map1 <- readRDS("/home/rstudio/motor_crashes/Output/map.rds")
   # hist_fig1 <- readRDS("/home/rstudio/motor_crashes/Output/hist_hyp_before.rds")
   # hist_fig2 <- readRDS("/home/rstudio/motor_crashes/Output/hist_hyp_after.rds")
   
@@ -192,6 +198,10 @@ DefineServer <- function(input, output){
   #########################################
   # Explore tab
   #########################################
+  
+  output$map1 <- plotly::renderPlotly({
+    map1
+  })
   
   output$ts_fig1 <- plotly::renderPlotly({
     print(ts_fig1)
@@ -317,7 +327,7 @@ DefineServer <- function(input, output){
     
     arima_model <- forecast::Arima(ts_data_sum_ts,
                                    order=c(5, 1, 2),
-                                   include.drift = T)
+                                   include.drift = F)
     
     preds <- forecast(arima_model, h = 300, level=c(99.6))
     plot(preds)

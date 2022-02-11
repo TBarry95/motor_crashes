@@ -39,6 +39,7 @@ length(unique(motor_data$COLLISION_ID))
 
 motor_data$TOTAL_KILLED <- rowSums(motor_data[, c("NUMBER.OF.PERSONS.KILLED", "NUMBER.OF.PEDESTRIANS.KILLED", "NUMBER.OF.CYCLIST.KILLED", "NUMBER.OF.MOTORIST.KILLED" )])
 motor_data$TOTAL_INJURED <- rowSums(motor_data[, c("NUMBER.OF.PERSONS.INJURED", "NUMBER.OF.PEDESTRIANS.INJURED", "NUMBER.OF.CYCLIST.INJURED", "NUMBER.OF.MOTORIST.INJURED" )])
+motor_data$TOTAL_INJ_OR_KILL <- rowSums(motor_data[, c("TOTAL_KILLED", "TOTAL_INJURED")])
 
 ############################################################
 # Explore data:
@@ -231,11 +232,52 @@ saveRDS(fig, "/home/rstudio/motor_crashes/Output/ts_crashes_ratio.rds")
 # - Pivot table based on car type
 #######################################
 
-pivot_data1 <- motor_data[, c("VEHICLE.TYPE.CODE.1", "BOROUGH")]
+pivot_data1 <- motor_data[, c("VEHICLE.TYPE.CODE.1", "BOROUGH", "TOTAL_INJ_OR_KILL")]
+pivot_data1 <- pivot_data1[!is.na(pivot_data1$VEHICLE.TYPE.CODE.1) & 
+                             !is.na(pivot_data1$BOROUGH) & 
+                             !is.na(pivot_data1$TOTAL_INJ_OR_KILL), ]
+
 pivot_data1_sum <- data.frame(table(pivot_data1$VEHICLE.TYPE.CODE.1))
 pivot_data1_sum1 <- pivot_data1_sum[pivot_data1_sum$Freq < 200,]
 pivot_data1$VEHICLE.TYPE.CODE.1[pivot_data1$VEHICLE.TYPE.CODE.1 %in% pivot_data1_sum1$Var1 | 
                                   is.null(pivot_data1$VEHICLE.TYPE.CODE.1)] <- "OTHER"
+
+pivot_data1$TOTAL_INJ_OR_KILL[is.na(pivot_data1$TOTAL_INJ_OR_KILL)] <- 0
+pivot_data1$TOTAL_INJ_OR_KILL2 <- NA
+
+pivot_data1$TOTAL_INJ_OR_KILL2 <- ifelse(pivot_data1$TOTAL_INJ_OR_KILL == 0,
+                                         0,
+                                         pivot_data1$TOTAL_INJ_OR_KILL)
+
+pivot_data1$TOTAL_INJ_OR_KILL2 <- ifelse(pivot_data1$TOTAL_INJ_OR_KILL > 0 & pivot_data1$TOTAL_INJ_OR_KILL <= 5,
+                                         "1-5",
+                                         pivot_data1$TOTAL_INJ_OR_KILL2)
+
+
+pivot_data1$TOTAL_INJ_OR_KILL2 <- ifelse(pivot_data1$TOTAL_INJ_OR_KILL > 5 & pivot_data1$TOTAL_INJ_OR_KILL <= 10,
+                                         "6-10",
+                                         pivot_data1$TOTAL_INJ_OR_KILL2)
+
+pivot_data1$TOTAL_INJ_OR_KILL2 <- ifelse(pivot_data1$TOTAL_INJ_OR_KILL > 10,
+                                         "10+",
+                                         pivot_data1$TOTAL_INJ_OR_KILL2)
+# 
+# for (i in 1:nrow(pivot_data1)){
+#   if (pivot_data1$TOTAL_INJ_OR_KILL[i] <= 5){
+#     pivot_data1$TOTAL_INJ_OR_KILL2[i] <- "1-5"
+#   } else if (pivot_data1$TOTAL_INJ_OR_KILL[i] > 5 & pivot_data1$TOTAL_INJ_OR_KILL[i] <= 10){
+#     pivot_data1$TOTAL_INJ_OR_KILL2[i] <- "6-10"
+#   } else {
+#     pivot_data1$TOTAL_INJ_OR_KILL2[i] <- "10+"
+#   }
+# }
+# 
+# pivot_data1$TOTAL_INJ_OR_KILL2 <- ifelse(pivot_data1$TOTAL_INJ_OR_KILL == 0,
+#                                          0,
+#                                          pivot_data1$TOTAL_INJ_OR_KILL2)
+pivot_data1 <- pivot_data1[, c("VEHICLE.TYPE.CODE.1", "BOROUGH", "TOTAL_INJ_OR_KILL2")]
+pivot_data1 <- pivot_data1[, c("VEHICLE.TYPE.CODE.1", "BOROUGH")]
+
 
 pivot1 <- rpivotTable(pivot_data1, 
             rows = c("VEHICLE.TYPE.CODE.1", "BOROUGH"))

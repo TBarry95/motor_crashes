@@ -15,6 +15,8 @@ library("forecast")
 # Get data
 ############################################################
 
+ts_data_sum3 <- readRDS("/home/rstudio/motor_crashes/Output/ts_data_sum3.rds")
+
 ts_data_sum <- readRDS("/home/rstudio/motor_crashes/Output/ts_data_sum.rds")
 ts_data_sum$DATE <- as.Date(ts_data_sum$DATE, format = "%m/%d/%Y")
 ts_data_sum <- ts_data_sum[order(ts_data_sum$DATE, decreasing = F), ]
